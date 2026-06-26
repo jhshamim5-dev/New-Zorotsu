@@ -1,0 +1,30 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Outer glowing circular ring / orbit representing dynamic anime energy -->
+    <path
+        android:pathData="M54,12 C30.8,12 12,30.8 12,54 C12,77.2 30.8,96 54,96 C77.2,96 96,77.2 96,54"
+        android:strokeWidth="5"
+        android:strokeColor="#FF6C00"
+        android:strokeLineCap="round"
+        android:fillColor="#00000000" />
+    
+    <!-- Futuristic "Z" character styled with sharp aesthetic cuts -->
+    <path
+        android:pathData="M30,32 H78 L40,76 H78"
+        android:strokeWidth="10"
+        android:strokeColor="#FFFFFF"
+        android:strokeLineJoin="round"
+        android:strokeLineCap="round"
+        android:fillColor="#00000000" />
+        
+    <!-- Accent spark indicating premium anime content tracking -->
+    <path
+        android:pathData="M78,32 L66,44 M42,64 L30,76"
+        android:strokeWidth="4"
+        android:strokeColor="#FFC107"
+        android:strokeLineCap="round"
+        android:fillColor="#00000000" />
+</vector>

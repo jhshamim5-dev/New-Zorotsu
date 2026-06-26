@@ -1,0 +1,6 @@
+{
+  "name": "Zorotsu",
+  "description": "A modern anime list manager and tracker for Android with AniList and MyAnimeList integration.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
