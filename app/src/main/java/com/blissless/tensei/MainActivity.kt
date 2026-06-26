@@ -152,11 +152,12 @@ class MainActivity : ComponentActivity() {
         handleAuthCallback(intent)
 
         setContent {
+            val isSplashReady by mainViewModel.splashReady.collectAsState()
             var showSplash by remember { mutableStateOf(true) }
             var splashProgress by remember { mutableFloatStateOf(1f) }
 
-            LaunchedEffect(mainViewModel.splashReady) {
-                if (mainViewModel.splashReady.value) {
+            LaunchedEffect(isSplashReady) {
+                if (isSplashReady) {
                     splashProgress = 2f
                     delay(400.milliseconds)
                     showSplash = false

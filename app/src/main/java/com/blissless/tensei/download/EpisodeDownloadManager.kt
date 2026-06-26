@@ -385,19 +385,19 @@ class EpisodeDownloadManager(private val context: Context) {
                             }
 
                             Download.STATE_QUEUED -> {
-                                TODO()
+                                // Handled via updateDownloadInfo
                             }
 
                             Download.STATE_REMOVING -> {
-                                TODO()
+                                // Handled via updateDownloadInfo
                             }
 
                             Download.STATE_RESTARTING -> {
-                                TODO()
+                                // Handled via updateDownloadInfo
                             }
 
                             Download.STATE_STOPPED -> {
-                                TODO()
+                                // Handled via updateDownloadInfo
                             }
                         }
                         updateDownloadInfo(download)
