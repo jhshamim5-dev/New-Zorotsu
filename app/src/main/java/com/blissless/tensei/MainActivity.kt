@@ -104,6 +104,8 @@ import com.blissless.tensei.data.models.EpisodeStreams
 import com.blissless.tensei.data.models.ExploreAnime
 import com.blissless.tensei.data.models.LocalAnimeEntry
 import eu.kanade.tachiyomi.animesource.model.Video
+import com.blissless.tensei.stream.LocalProxyServer
+import eu.kanade.tachiyomi.animesource.online.AnimeHttpSource
 import com.blissless.tensei.data.models.QualityOption
 import com.blissless.tensei.data.models.ServerInfo
 import com.blissless.tensei.stream.PlayerData
@@ -746,15 +748,38 @@ fun MainScreen(
     }
 
     fun playExtensionVideo(result: MainViewModel.ExtensionStreamResult, index: Int) {
-        result.videos.forEachIndexed { _, _ ->
+        val video = result.videos.getOrNull(index) ?: return
+        val isOurProxy = video.videoUrl.contains("127.0.0.1:${LocalProxyServer.PROXY_PORT}") || video.videoUrl.contains("localhost:${LocalProxyServer.PROXY_PORT}")
+        val usePreResolved = video.videoTitle == result.videoTitle && result.url.isNotEmpty()
+
+        if (!usePreResolved && isOurProxy && result.source != null) {
+            scope.launch {
+                val resolvedUrl = withContext(Dispatchers.IO) {
+                    try {
+                        val src = result.source
+                        if (src is AnimeHttpSource) {
+                            val resUrl = src.getVideoUrl(video)
+                            if (!resUrl.contains("127.0.0.1") && !resUrl.contains("localhost") && resUrl.isNotBlank()) {
+                                resUrl
+                            } else {
+                                val resolved = src.resolveVideo(video)
+                                val rUrl = resolved?.videoUrl
+                                if (rUrl != null && !rUrl.contains("127.0.0.1") && !rUrl.contains("localhost")) rUrl else video.videoUrl
+                            }
+                        } else video.videoUrl
+                    } catch (e: Exception) {
+                        video.videoUrl
+                    }
+                }
+                val updatedResult = result.copy(url = resolvedUrl, videoTitle = video.videoTitle)
+                playExtensionVideo(updatedResult, index)
+            }
+            return
         }
-        val video = result.videos.find { it.videoUrl == result.url }
-            ?: result.videos.getOrNull(index)
-            ?: return
+
         streamError = null
         currentEpisodeTitle = sanitizeEpisodeTitle(result.episode?.name) ?: "Episode $currentEpisode"
-        // Use result.url (which may have been resolved from proxy to real URL), fallback to video.videoUrl
-        currentVideoUrl = result.url.ifEmpty { video.videoUrl }
+        currentVideoUrl = if (usePreResolved) result.url else video.videoUrl
         currentReferer = result.referer
         val preferredLang = viewModel.defaultSubtitleLang.value
         val sortedTracks = video.subtitleTracks.sortedByDescending { t ->
@@ -766,17 +791,17 @@ fun MainScreen(
         }
         currentSubtitleTracks = sortedTracks
         currentSubtitleUrl = sortedTracks.firstOrNull()?.url
-        sortedTracks.forEachIndexed { _, _ ->
-        }
+        
         extensionName = result.source?.name ?: ""
-        currentServerName = result.hosters?.firstOrNull()?.hosterName ?: extensionName.ifEmpty { "Extension" }
-        val hasDubHoster = result.hosters?.any { it.hosterName.contains("dub", ignoreCase = true) } == true
-        currentCategory = if (hasDubHoster || result.videoTitle.contains("dub", ignoreCase = true)) "dub" else "sub"
+        currentServerName = result.hosters?.getOrNull(index)?.hosterName ?: video.videoTitle.ifEmpty { extensionName.ifEmpty { "Extension" } }
+        val isDub = video.videoTitle.contains("dub", ignoreCase = true) || 
+                    (result.hosters?.getOrNull(index)?.hosterName?.contains("dub", ignoreCase = true) ?: false)
+        currentCategory = if (isDub) "dub" else "sub"
         actualCategory = currentCategory
         requestedCategory = preferredCategory
         currentQualityOptions = emptyList()
         currentQuality = "Auto"
-        currentServerIndex = 0
+        currentServerIndex = index
         isExtensionFlow = false
         extensionOkHttpClient = result.extensionClient
         extensionVideoHeaders = result.videoHeaders
@@ -798,8 +823,6 @@ fun MainScreen(
                     !it.videoTitle.contains("dub", ignoreCase = true) && it.subtitleTracks.isNotEmpty()
                 }
                 if (subVideo != null) {
-                    subVideo.subtitleTracks.forEachIndexed { _, _ ->
-                    }
                     currentSubtitleTracks = currentSubtitleTracks + subVideo.subtitleTracks
                     if (currentSubtitleUrl == null) {
                         currentSubtitleUrl = currentSubtitleTracks.firstOrNull()?.url
