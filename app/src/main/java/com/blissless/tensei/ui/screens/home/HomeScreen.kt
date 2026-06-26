@@ -353,7 +353,7 @@ fun HomeScreen(
                             ) {
                                 Spacer(modifier = Modifier.width(4.dp))
                                 AsyncImage(
-                                    model = R.mipmap.ic_launcher_round,
+                                    model = R.drawable.anime_app_logo,
                                     contentDescription = "App",
                                     modifier = Modifier.size(40.dp).clip(CircleShape)
                                 )
@@ -395,7 +395,7 @@ fun HomeScreen(
                         Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp), shape = RoundedCornerShape(20.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))) {
                             Box(modifier = Modifier.fillMaxWidth().background(Brush.horizontalGradient(colors = listOf(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f), MaterialTheme.colorScheme.primary.copy(alpha = 0.05f)))).padding(24.dp)) {
                                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                    AsyncImage(model = R.mipmap.ic_launcher_round, contentDescription = null, modifier = Modifier.size(64.dp).clip(CircleShape))
+                                    AsyncImage(model = R.drawable.anime_app_logo, contentDescription = null, modifier = Modifier.size(64.dp).clip(CircleShape))
                                     Spacer(modifier = Modifier.height(16.dp)); Text("Welcome to Zorotsu", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
                                     Spacer(modifier = Modifier.height(8.dp)); Text("Your lists are empty. Sign in with AniList to sync your anime list and track your progress, or start exploring!", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center)
                                     Spacer(modifier = Modifier.height(20.dp))
@@ -952,7 +952,7 @@ fun HomeScreen(
                         contentAlignment = Alignment.Center
                     ) {
                         AsyncImage(
-                            model = R.mipmap.ic_launcher_round,
+                            model = R.drawable.anime_app_logo,
                             contentDescription = "App",
                             modifier = Modifier.size(40.dp).clip(CircleShape)
                         )

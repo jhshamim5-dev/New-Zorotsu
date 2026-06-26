@@ -41,6 +41,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Download
@@ -49,6 +50,8 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.FilterChip
@@ -575,27 +578,114 @@ fun RichEpisodeScreen(
                         Spacer(modifier = Modifier.height(8.dp))
                         // Extension selector
                         if (availableExtensions.isNotEmpty()) {
+                            var showSourceDropdown by remember { mutableStateOf(false) }
+                            val currentSourceName = sortedExtensions.firstOrNull { it.second == selectedExtensionPkg }?.first ?: "Select Source"
+
                             Row(
-                                modifier = Modifier.horizontalScroll(rememberScrollState()).padding(horizontal = 12.dp),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 16.dp, vertical = 4.dp),
                                 verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                horizontalArrangement = Arrangement.SpaceBetween
                             ) {
-                                Text("Source:", style = MaterialTheme.typography.labelSmall, color = if (isOled) Color.White.copy(alpha = 0.6f) else MaterialTheme.colorScheme.onSurfaceVariant)
-                                sortedExtensions.forEach { (extName, extPkg) ->
-                                    FilterChip(
-                                        selected = extPkg == selectedExtensionPkg,
-                                        onClick = { if (extPkg != selectedExtensionPkg) selectedExtensionPkg = extPkg },
-                                        label = { Text(extName, maxLines = 1, style = MaterialTheme.typography.labelSmall) },
-                                        colors = FilterChipDefaults.filterChipColors(
-                                            selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                                            selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                                            containerColor = if (isOled) Color(0xFF1A1A1A) else MaterialTheme.colorScheme.surface,
-                                            labelColor = MaterialTheme.colorScheme.onSurfaceVariant
-                                        )
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.PlayArrow,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                    Text(
+                                        "Streaming Source",
+                                        style = MaterialTheme.typography.titleSmall,
+                                        fontWeight = FontWeight.SemiBold,
+                                        color = if (isOled) Color.White else MaterialTheme.colorScheme.onSurface
                                     )
                                 }
+
+                                Box {
+                                    Surface(
+                                        onClick = { showSourceDropdown = true },
+                                        shape = RoundedCornerShape(12.dp),
+                                        color = if (isOled) Color(0xFF1A1A1A) else MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f),
+                                        border = BorderStroke(
+                                            width = 1.dp,
+                                            color = if (isOled) Color.White.copy(alpha = 0.1f) else MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
+                                        ),
+                                        modifier = Modifier.height(36.dp)
+                                    ) {
+                                        Row(
+                                            modifier = Modifier.padding(horizontal = 12.dp),
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                        ) {
+                                            Text(
+                                                text = currentSourceName,
+                                                style = MaterialTheme.typography.labelMedium,
+                                                fontWeight = FontWeight.Bold,
+                                                color = if (isOled) Color.White else MaterialTheme.colorScheme.primary
+                                            )
+                                            Icon(
+                                                imageVector = Icons.Default.ArrowDropDown,
+                                                contentDescription = "Select Source",
+                                                tint = if (isOled) Color.White.copy(alpha = 0.7f) else MaterialTheme.colorScheme.primary,
+                                                modifier = Modifier.size(20.dp)
+                                            )
+                                        }
+                                    }
+
+                                    DropdownMenu(
+                                        expanded = showSourceDropdown,
+                                        onDismissRequest = { showSourceDropdown = false },
+                                        modifier = Modifier
+                                            .background(if (isOled) Color(0xFF0F0F0F) else MaterialTheme.colorScheme.surfaceVariant)
+                                            .border(
+                                                width = 1.dp,
+                                                color = if (isOled) Color.White.copy(alpha = 0.1f) else Color.Transparent,
+                                                shape = RoundedCornerShape(8.dp)
+                                            )
+                                    ) {
+                                        sortedExtensions.forEach { (extName, extPkg) ->
+                                            val isSelected = extPkg == selectedExtensionPkg
+                                            DropdownMenuItem(
+                                                text = {
+                                                    Row(
+                                                        verticalAlignment = Alignment.CenterVertically,
+                                                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                                    ) {
+                                                        if (isSelected) {
+                                                            Icon(
+                                                                imageVector = Icons.Default.Check,
+                                                                contentDescription = "Selected",
+                                                                tint = MaterialTheme.colorScheme.primary,
+                                                                modifier = Modifier.size(16.dp)
+                                                            )
+                                                        } else {
+                                                            Spacer(modifier = Modifier.width(16.dp))
+                                                        }
+                                                        Text(
+                                                            text = extName,
+                                                            style = MaterialTheme.typography.labelLarge,
+                                                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                                                            color = if (isOled) Color.White else MaterialTheme.colorScheme.onSurface
+                                                        )
+                                                    }
+                                                },
+                                                onClick = {
+                                                    if (extPkg != selectedExtensionPkg) {
+                                                        selectedExtensionPkg = extPkg
+                                                    }
+                                                    showSourceDropdown = false
+                                                }
+                                            )
+                                        }
+                                    }
+                                }
                             }
-                            Spacer(modifier = Modifier.height(8.dp))
+                            Spacer(modifier = Modifier.height(10.dp))
                         }
                         // Navigation chips
                         Row(

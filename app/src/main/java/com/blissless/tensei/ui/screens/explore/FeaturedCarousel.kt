@@ -202,7 +202,7 @@ fun FeaturedCarousel(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     AsyncImage(
-                        model = com.blissless.tensei.R.mipmap.ic_launcher_round,
+                        model = com.blissless.tensei.R.drawable.anime_app_logo,
                         contentDescription = "App",
                         modifier = Modifier.size(32.dp).clip(CircleShape)
                     )

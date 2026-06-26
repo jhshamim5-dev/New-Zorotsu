@@ -122,6 +122,32 @@ class ExtensionsViewModel(application: Application) : AndroidViewModel(applicati
                     Log.e("ExtensionsViewModel", "Failed to load in-built Miruro", e)
                 }
 
+                try {
+                    val anidbSource = eu.kanade.tachiyomi.animeextension.en.anidb.AniDb()
+                    extensions.add(
+                        Extension(
+                            packageName = "eu.kanade.tachiyomi.animeextension.en.anidb",
+                            name = "AniDB (In-built)",
+                            versionName = "1.0.0",
+                            versionCode = 1L,
+                            icon = null,
+                            sourceClass = "eu.kanade.tachiyomi.animeextension.en.anidb.AniDb",
+                            isNsfw = false,
+                            isInstalled = true,
+                            installTime = System.currentTimeMillis(),
+                            sources = listOf(
+                                SourceInfo(
+                                    id = anidbSource.id,
+                                    name = "AniDB",
+                                    lang = "en"
+                                )
+                            )
+                        )
+                    )
+                } catch (e: Exception) {
+                    Log.e("ExtensionsViewModel", "Failed to load in-built AniDb", e)
+                }
+
                 lastExtensionCount = extensions.size
                 val diff = extensions.size - previousCount
                 val message = when {

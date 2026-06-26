@@ -69,6 +69,32 @@ class SourceManager(context: Context) {
                 Log.e("SourceManager", "Failed to load in-built Miruro source", e)
             }
 
+            // Inject the in-built AniDb source
+            try {
+                val anidbSource = eu.kanade.tachiyomi.animeextension.en.anidb.AniDb()
+                val anidbExt = Extension(
+                    packageName = "eu.kanade.tachiyomi.animeextension.en.anidb",
+                    name = "AniDB (In-built)",
+                    versionName = "1.0.0",
+                    versionCode = 1L,
+                    icon = null,
+                    sourceClass = "eu.kanade.tachiyomi.animeextension.en.anidb.AniDb",
+                    isNsfw = false,
+                    isInstalled = true,
+                    installTime = System.currentTimeMillis(),
+                    sources = listOf(
+                        com.blissless.tensei.extensions.SourceInfo(
+                            id = anidbSource.id,
+                            name = "AniDB",
+                            lang = "en"
+                        )
+                    )
+                )
+                loaded.add(SourceWithExt(anidbSource, anidbExt))
+            } catch (e: Exception) {
+                Log.e("SourceManager", "Failed to load in-built AniDb source", e)
+            }
+
             sources = loaded
         }
     }

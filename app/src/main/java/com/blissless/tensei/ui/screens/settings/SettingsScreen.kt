@@ -212,7 +212,7 @@ private fun SettingsLandingPage(
             modifier = Modifier.padding(bottom = 20.dp)
         ) {
             AsyncImage(
-                model = R.mipmap.ic_launcher_round,
+                model = R.drawable.anime_app_logo,
                 contentDescription = "App",
                 modifier = Modifier.size(48.dp).clip(CircleShape)
             )
@@ -1597,7 +1597,7 @@ private fun AboutSettingsPage(
                     contentAlignment = Alignment.Center
                 ) {
                     AsyncImage(
-                        model = R.mipmap.ic_launcher_round,
+                        model = R.drawable.anime_app_logo,
                         contentDescription = "App",
                         modifier = Modifier.size(36.dp).clip(CircleShape)
                     )
