@@ -63,6 +63,14 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.layout.heightIn
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -134,6 +142,7 @@ class MainActivity : ComponentActivity() {
         const val TOKEN_KEY = "auth_token"
     }
 
+    @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
@@ -191,19 +200,21 @@ class MainActivity : ComponentActivity() {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(Color.Black)
+                        .background(Color.Black),
+                    contentAlignment = Alignment.Center
                 ) {
                     Image(
-                        painter = painterResource(id = R.drawable.splash),
+                        painter = painterResource(id = R.drawable.anime_app_logo),
                         contentDescription = null,
                         modifier = Modifier
-                            .fillMaxSize()
+                            .size(180.dp)
+                            .clip(RoundedCornerShape(32.dp))
                             .graphicsLayer(
                                 scaleX = scale,
                                 scaleY = scale,
                                 alpha = alpha.coerceIn(0f, 1f)
                             ),
-                        contentScale = ContentScale.Crop
+                        contentScale = ContentScale.Fit
                     )
                 }
             } else {
@@ -625,6 +636,7 @@ fun MainScreen(
     var showExtHosterDialog by remember { mutableStateOf(false) }
     var showExtVideoDialog by remember { mutableStateOf(false) }
     var pendingExtResult by remember { mutableStateOf<MainViewModel.ExtensionStreamResult?>(null) }
+    var activeStreamResultForBottomSheet by remember { mutableStateOf<MainViewModel.ExtensionStreamResult?>(null) }
     var isExtensionFlow by remember { mutableStateOf(false) }
     var extensionOkHttpClient by remember { mutableStateOf<okhttp3.OkHttpClient?>(null) }
     var extensionVideoHeaders by remember { mutableStateOf<Map<String, String>>(emptyMap()) }
@@ -827,7 +839,12 @@ fun MainScreen(
                     PlayerData.extensionSource = result.source
                     PlayerData.extensionEpisode = result.episode
                     PlayerData.allHosters = result.hosters ?: emptyList()
-                    playExtensionVideo(result, 0)
+                    
+                    if (isAutoRefresh || result.videos.size <= 1) {
+                        playExtensionVideo(result, 0)
+                    } else {
+                        activeStreamResultForBottomSheet = result
+                    }
                 } else {
                     streamError = "Extension stream not found: Ep $episode"
                     Toast.makeText(context, "Extension failed for Ep $episode", Toast.LENGTH_SHORT).show()
@@ -2211,6 +2228,99 @@ streamError?.let { error ->
                             }
                         }
                     )
+                }
+
+                val activeStream = activeStreamResultForBottomSheet
+                if (activeStream != null) {
+                    ModalBottomSheet(
+                        onDismissRequest = { activeStreamResultForBottomSheet = null },
+                        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+                        containerColor = Color(0xFF14151B),
+                        contentColor = Color.White
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 24.dp)
+                                .padding(bottom = 40.dp)
+                        ) {
+                            Text(
+                                text = "Select Server & Stream Type",
+                                style = MaterialTheme.typography.titleLarge,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White
+                            )
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                text = "Episode $extensionEpisodeNumber",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = Color.White.copy(alpha = 0.6f)
+                            )
+                            Spacer(modifier = Modifier.height(20.dp))
+
+                            LazyColumn(
+                                verticalArrangement = Arrangement.spacedBy(10.dp),
+                                modifier = Modifier.fillMaxWidth().heightIn(max = 400.dp)
+                            ) {
+                                itemsIndexed(activeStream.videos) { index, video ->
+                                    val isDub = video.videoTitle.contains("dub", ignoreCase = true) || 
+                                                (activeStream.hosters?.getOrNull(index)?.hosterName?.contains("dub", ignoreCase = true) ?: false)
+                                    val isSoftSub = video.videoTitle.contains("soft sub", ignoreCase = true)
+                                    val isSub = !isDub && !isSoftSub
+                                    
+                                    Surface(
+                                        onClick = {
+                                            activeStreamResultForBottomSheet = null
+                                            playExtensionVideo(activeStream, index)
+                                        },
+                                        shape = RoundedCornerShape(12.dp),
+                                        color = Color(0xFF1E202B),
+                                        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.1f)),
+                                        modifier = Modifier.fillMaxWidth()
+                                    ) {
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(16.dp)
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.PlayArrow,
+                                                contentDescription = null,
+                                                tint = MaterialTheme.colorScheme.primary,
+                                                modifier = Modifier.size(24.dp)
+                                            )
+                                            Spacer(modifier = Modifier.width(16.dp))
+                                            Column(modifier = Modifier.weight(1f)) {
+                                                Text(
+                                                    text = video.videoTitle,
+                                                    style = MaterialTheme.typography.bodyLarge,
+                                                    fontWeight = FontWeight.SemiBold,
+                                                    color = Color.White
+                                                )
+                                                val badgeText = when {
+                                                    isDub -> "DUB"
+                                                    isSoftSub -> "SOFT SUB"
+                                                    else -> "SUB"
+                                                }
+                                                val badgeColor = when {
+                                                    isDub -> Color(0xFFFFB300)
+                                                    isSoftSub -> Color(0xFF00E5FF)
+                                                    else -> Color(0xFF00E676)
+                                                }
+                                                Text(
+                                                    text = badgeText,
+                                                    style = MaterialTheme.typography.labelSmall,
+                                                    color = badgeColor,
+                                                    fontWeight = FontWeight.Bold
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }

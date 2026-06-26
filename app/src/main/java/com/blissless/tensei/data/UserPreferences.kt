@@ -132,7 +132,7 @@ class UserPreferences(context: Context) {
     val preferredScraper: StateFlow<String> = _preferredScraper.asStateFlow()
 
     // Default Extension
-    private val _defaultExtensionPackage = MutableStateFlow("")
+    private val _defaultExtensionPackage = MutableStateFlow("eu.kanade.tachiyomi.animeextension.en.miruro")
     val defaultExtensionPackage: StateFlow<String> = _defaultExtensionPackage.asStateFlow()
 
     // Default Subtitle Language
@@ -248,7 +248,8 @@ class UserPreferences(context: Context) {
         _autoPlayNextEpisode.value = sharedPreferences.getBoolean(KEY_AUTO_PLAY_NEXT_EPISODE, true)
         _enableThumbnailPreview.value = sharedPreferences.getBoolean(KEY_ENABLE_THUMBNAIL_PREVIEW, false)
         _preferredScraper.value = sharedPreferences.getString(KEY_PREFERRED_SCRAPER, "Animekai") ?: "Animekai"
-        _defaultExtensionPackage.value = sharedPreferences.getString(KEY_DEFAULT_EXTENSION, "") ?: ""
+        val savedExt = sharedPreferences.getString(KEY_DEFAULT_EXTENSION, "") ?: ""
+        _defaultExtensionPackage.value = if (savedExt.isEmpty()) "eu.kanade.tachiyomi.animeextension.en.miruro" else savedExt
         _defaultSubtitleLang.value = sharedPreferences.getString(KEY_DEFAULT_SUBTITLE_LANG, "English") ?: "English"
         _downloadPreferredCategory.value = sharedPreferences.getString(KEY_DOWNLOAD_PREFERRED_CATEGORY, "same_as_stream") ?: "same_as_stream"
         _downloadSubtitleLang.value = sharedPreferences.getString(KEY_DOWNLOAD_SUBTITLE_LANG, "same_as_stream") ?: "same_as_stream"
