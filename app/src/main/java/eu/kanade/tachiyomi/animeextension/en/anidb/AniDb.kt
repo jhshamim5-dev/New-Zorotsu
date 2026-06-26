@@ -52,8 +52,30 @@ class AniDb : AnimeHttpSource() {
 
     override fun latestUpdatesParse(response: Response): AnimesPage = popularAnimeParse(response)
 
+    private fun cleanQuery(query: String): String {
+        var q = query
+        // If there's a colon, split and take the first part if it's reasonably long
+        if (q.contains(":")) {
+            val before = q.substringBefore(":")
+            if (before.trim().length > 3) {
+                q = before
+            }
+        }
+        // Remove common season indicators
+        q = q.replace(Regex("(?i)\\bseason\\s*\\d+\\b"), "")
+        q = q.replace(Regex("(?i)\\b\\d+(st|nd|rd|th)\\s*season\\b"), "")
+        q = q.replace(Regex("(?i)\\bpart\\s*\\d+\\b"), "")
+        
+        // Replace special characters/punctuation with spaces to avoid search syntax issues
+        q = q.replace(Regex("[^a-zA-Z0-9\\s]"), " ")
+        
+        // Collapse multiple spaces
+        return q.replace(Regex("\\s+"), " ").trim()
+    }
+
     override fun searchAnimeRequest(page: Int, query: String, filters: AnimeFilterList): Request {
-        return GET("$baseUrl/browse?q=$query&page=$page", headers)
+        val cleanedQuery = cleanQuery(query)
+        return GET("$baseUrl/browse?q=$cleanedQuery&page=$page", headers)
     }
 
     override fun searchAnimeParse(response: Response): AnimesPage = popularAnimeParse(response)

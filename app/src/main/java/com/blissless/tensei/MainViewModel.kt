@@ -160,8 +160,11 @@ class MainViewModel : ViewModel() {
                 try {
                     val page = source.getSearchAnime(1, query, AnimeFilterList())
                     matchedSAnime = page.animes.firstOrNull { a ->
-                        a.title.contains(anime.title, ignoreCase = true) ||
-                                (anime.titleEnglish != null && a.title.contains(anime.titleEnglish, ignoreCase = true))
+                        val cleanA = a.title.lowercase().replace(Regex("[^a-z0-9]"), "")
+                        val cleanTitle = anime.title.lowercase().replace(Regex("[^a-z0-9]"), "")
+                        val cleanEnglish = anime.titleEnglish?.lowercase()?.replace(Regex("[^a-z0-9]"), "")
+                        cleanA.contains(cleanTitle) || cleanTitle.contains(cleanA) ||
+                                (cleanEnglish != null && (cleanA.contains(cleanEnglish) || cleanEnglish.contains(cleanA)))
                     } ?: page.animes.firstOrNull()
                     if (matchedSAnime != null) break
                 } catch (_: Exception) { }

@@ -101,7 +101,7 @@ class ExtensionsViewModel(application: Application) : AndroidViewModel(applicati
                     extensions.add(
                         Extension(
                             packageName = "eu.kanade.tachiyomi.animeextension.en.miruro",
-                            name = "Miruro.tv (In-built)",
+                            name = "Miruro.tv",
                             versionName = "1.0.0",
                             versionCode = 1L,
                             icon = null,
@@ -127,7 +127,7 @@ class ExtensionsViewModel(application: Application) : AndroidViewModel(applicati
                     extensions.add(
                         Extension(
                             packageName = "eu.kanade.tachiyomi.animeextension.en.anidb",
-                            name = "AniDB (In-built)",
+                            name = "AniDB",
                             versionName = "1.0.0",
                             versionCode = 1L,
                             icon = null,
